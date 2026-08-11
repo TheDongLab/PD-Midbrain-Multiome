@@ -1,56 +1,141 @@
-# Cleaned analysis scripts (manuscript / reuse)
+# PD Midbrain Multiome — Analysis Scripts
 
-Reorganized versions of the main step scripts for the ASAP Multiome (PD substantia
-nigra) single-nucleus multiome pipeline. Each script keeps the original analysis
-logic for its core computational steps, adds a documented header, sources a shared
-`config.R`, consolidates `library()` calls, and removes package-install,
-interactive (`tmux`/debug), and non-English clutter.
+Analysis scripts for a single-nucleus multiome study of the human substantia
+nigra in Parkinson’s disease (PD), incidental Lewy body disease (ILBD), and
+healthy controls (HC). Each nucleus has paired snRNA-seq and snATAC-seq
+(Cell Ranger ARC; genome build hg38).
 
-**Scope:** Most scripts were further trimmed to **core steps only** — QC plots,
-summary tables, and downstream interpretation blocks (GO/GSEA, LocusZoom, motif
-analysis, cross-cell-type summaries, etc.) were removed so the folder is suitable
-as a manuscript supplement. `Filtering-Clustering.R` still retains QC and UMAP
-figures because clustering and manual annotation depend on them. S-LDSC plotting
-remains in the original `../scripts/GWAS-LDSC-QTL-plot+Neurons.R` (not copied
-here).
+The folder contains the core computational steps used in the manuscript: from
+multiome object construction and cell-type annotation, through cis-QTL mapping
+and GWAS integration, to differential expression, peak–gene linking, and
+cell-type gene-regulatory networks (SCENIC+ / eRegulons).
 
-## How to run
+---
 
-1. Edit `config.R` and set `PROJECT_ROOT` (and, if needed, `CELLRANGER_DIR`,
-   `MACS_PATH`, `LDSC_HOME`, `METADATA_XLSX`) for your environment, or export the
-   matching environment variables (`ASAP_MULTIOME_ROOT`, `ASAP_CELLRANGER_DIR`,
-   `ASAP_MACS_PATH`, `LDSC_HOME`, `ASAP_METADATA_XLSX`).
-2. Run an R script from this directory, e.g. `Rscript Filtering-Clustering.R`.
-   Every R script begins with `source("config.R")`, which sets the working
-   directory to `PROJECT_ROOT`; all other paths are relative to it.
-3. Shell scripts (`GWAS-LDSC-QTL.sh`, `bw-files-for-ATAC.sh`) read the same
-   environment variables and can be run with `bash <script>.sh`.
+## Biological workflow
 
-`config.R` centralizes output directories, canonical object paths (`SEURAT_OBJECT`,
-`MACS_COUNTS`), QTL/GWAS inputs (`GENOTYPE_DIR`, `COVARIATES_FILE`, `SNP_LOC`,
-`GWAS_SUMSTATS`, `GWAS_CLUMPED`), the cell-type list (`CELL_TYPES`), and diagnosis
-contrasts (`COMPARISONS`). Step-local run targets (e.g. `ct <- "Neurons"` in QTL
-preprocessing, `CELL_TYPE <- "Microglia"` in eRegulon GSEA) remain at the top of
-the relevant script — change them or wrap the script in a loop to process all cell
-types.
+```
+snRNA + snATAC (Cell Ranger ARC)
+      │
+      ▼
+[01] Build & merge multiome objects
+      │
+      ▼
+[02] QC, integration, clustering, cell-type annotation
+      │
+      ▼
+[03] Cell-type ATAC peak calling (MACS)
+      │
+      ├──────────────────┬──────────────────┐
+      ▼                  ▼                  ▼
+[05] cis-caQTL          [06] cis-eQTL       [09] Diagnosis DEGs (NEBULA)
+      │                  │                  │
+      └────────┬─────────┘                  │
+               ▼                            │
+         [07] Colocalization                │
+              (caQTL + eQTL + PD GWAS)      │
+               │                            │
+               ▼                            │
+         [08] Cell-type QTL enrichment      │
+              of PD heritability (S-LDSC)   │
+                                            │
+[10] Peak–gene cis links (scMultiMap)       │
+                                            │
+[12] Cell-type GRNs (SCENIC+)               │
+      │                                     │
+      └──────────────┬──────────────────────┘
+                     ▼
+              [13] eRegulon enrichment
+                   in diagnosis DEG ranks
+```
 
-## Scripts (one per main pipeline step)
+**Upstream (01–03)** defines cell types and the accessible peak universe.
+**QTL / GWAS modules (05–08)** ask which regulatory variants and cell types
+contribute to PD risk. **DEG and linking (09–10)** and **GRN / eRegulon
+(12–13)** connect disease-associated expression changes to candidate enhancers
+and transcription-factor programs.
 
-| Script | Step | Summary |
-|--------|------|---------|
-| `config.R` | – | Shared paths, tool locations, and global parameters |
-| `Combining-Samples.R` | 01 | Build per-sample multiome Seurat objects and merge |
-| `Filtering-Clustering.R` | 02 | QC filtering, SCT/LSI, Harmony, WNN, doublets, annotation *(QC/UMAP plots retained)* |
-| `Callpeaks-CellTypes.R` | 03 | MACS peaks, union peak set, counts, cell-type-specific peaks |
-| `caQTL-preprocess.R` | 05 | Pseudobulk accessibility, PEER, FastQTL inputs (+ shell blocks) |
-| `eQTL-preprocess.R` | 06 | Pseudobulk expression, PEER, FastQTL inputs (+ shell blocks) |
-| `moloc-coloc.R` | 07 | moloc caQTL + eQTL + GWAS three-trait colocalization |
-| `GWAS-LDSC-QTL.sh` | 08 | S-LDSC partitioned heritability (annotations, LD scores, h²) |
-| `PD-differential-nebula-deg.R` | 09 | Single-cell NEBULA DEG across diagnosis contrasts |
-| `scMultiMap-peak-gene.R` | 10 | scMultiMap peak–gene cis linking |
-| `bw-files-for-ATAC.sh` | 11 | Per-cell-type normalized ATAC bigWig tracks |
-| `scenicplus_step1_per_celltype.py` | 12 | SCENIC+ pycisTopic (LDA / topics / DARs) per cell type |
-| `scenicplus_step2_per_celltype.py` | 12 | cisTarget motif database construction |
-| `scenicplus_step3_per_celltype.py` | 12 | SCENIC+ Snakemake config YAML generation |
-| `eRegulon-GSEA-core.R` | 13 | eRegulon gene-set GSEA on NEBULA DEG rankings (per cell type) |
+---
 
+## Analysis modules
+
+### A. Multiome atlas of the substantia nigra
+
+| Step | Script | Biological aim |
+|------|--------|----------------|
+| 01 | `Combining-Samples.R` | Load per-donor paired RNA + ATAC, compute QC metrics, merge into one multiome object |
+| 02 | `Filtering-Clustering.R` | Filter low-quality nuclei, integrate across donors (SCT / LSI / Harmony / WNN), cluster, and annotate major midbrain cell types |
+| 03 | `Callpeaks-CellTypes.R` | Call ATAC peaks per cell type and in bulk; build a union peak set and peak×cell counts for downstream accessibility analyses |
+
+After these steps, analyses use a labeled multiome object and cell-type-aware
+peak counts. Major cell types include DA, GABA, and Glu neurons, microglia,
+astrocytes, oligodendrocytes, OPCs, endothelial cells, pericytes, macrophages,
+and T cells.
+
+### B. Cell-type cis-QTLs and PD GWAS integration
+
+| Step | Script | Biological aim |
+|------|--------|----------------|
+| 05 | `caQTL-preprocess.R` | Pseudobulk chromatin accessibility by donor and cell type; map cis-caQTLs (FastQTL) |
+| 06 | `eQTL-preprocess.R` | Pseudobulk gene expression by donor and cell type; map cis-eQTLs (FastQTL) |
+| 07 | `moloc-coloc.R` | Three-trait colocalization of PD GWAS with cell-type caQTL and eQTL signals at lead risk loci |
+| 08 | `GWAS-LDSC-QTL.sh` | Stratified LD-score regression: enrichment of PD heritability in cell-type QTL annotations |
+
+Together these steps identify cell-type regulatory variants that may mediate PD
+GWAS effects via chromatin accessibility and/or expression.
+
+### C. Disease differential expression and enhancer–gene links
+
+| Step | Script | Biological aim |
+|------|--------|----------------|
+| 09 | `PD-differential-nebula-deg.R` | Single-cell DEGs between PD, ILBD, and HC within each cell type (NEBULA mixed models), adjusting for age, sex, PMI, batch, and technical factors |
+| 10 | `scMultiMap-peak-gene.R` | Link accessible peaks to candidate target genes in *cis* (±1 Mb) per cell type |
+
+Diagnosis contrasts: **PD vs HC**, **ILBD vs HC**, **PD vs ILBD**.
+
+### D. Cell-type gene regulatory networks
+
+| Step | Script | Biological aim |
+|------|--------|----------------|
+| 12.1 | `scenicplus_step1_per_celltype.py` | Topic modeling of accessibility (pycisTopic), differential accessible regions, and gene activity per cell type |
+| 12.2 | `scenicplus_step2_per_celltype.py` | Motif / cisTarget databases for cell-type region sets |
+| 12.3 | `scenicplus_step3_per_celltype.py` | Configure SCENIC+ GRN inference (enhancer-driven eRegulons) |
+| 13 | `eRegulon-GSEA-core.R` | Test whether SCENIC+ eRegulon target genes are enriched among diagnosis DEG rankings |
+
+This module recovers cell-type transcription-factor programs (eRegulons) and
+asks which programs shift along the HC → ILBD → PD axis.
+
+---
+
+## How to run (high level)
+
+1. Point scripts at your Cell Ranger ARC outputs, sample metadata, genotypes,
+   and PD GWAS summary statistics (paths are set at the top of each script or
+   shared project settings).
+2. Run modules in order **A → B/C → D**. Within A, steps **01 → 02 → 03** are
+   sequential. After peak calling, QTL mapping (05–06), DEGs (09), peak–gene
+   linking (10), and SCENIC+ (12) can largely proceed in parallel where inputs
+   allow.
+3. Several QTL scripts use an example cell type (e.g. pooled neurons); loop over
+   cell types for a full atlas-level analysis.
+4. Steps 05/06 combine R preprocessing with separate FastQTL shell runs; step 08
+   (S-LDSC) is long-running and is usually executed in stages.
+
+```bash
+Rscript Filtering-Clustering.R
+Rscript PD-differential-nebula-deg.R
+bash GWAS-LDSC-QTL.sh
+python scenicplus_step1_per_celltype.py --proj-dir ./scenicplus_project --celltypes Microglia
+```
+
+---
+
+## Scope
+
+Scripts retain **core analysis steps** for reproducibility. Omitted from most
+modules (see original project scripts if needed): package installation,
+interactive debugging, many QC/summary figures, and downstream interpretation
+panels (e.g. LocusZoom, motif-break analyses, broad GO collections beyond
+eRegulon GSEA). Clustering still keeps QC/UMAP plots required for annotation.
+
+S-LDSC **plotting** is not included here.
