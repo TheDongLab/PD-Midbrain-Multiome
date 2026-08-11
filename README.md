@@ -107,27 +107,6 @@ asks which programs shift along the HC → ILBD → PD axis.
 
 ---
 
-## How to run (high level)
-
-1. Point scripts at your Cell Ranger ARC outputs, sample metadata, genotypes,
-   and PD GWAS summary statistics (paths are set at the top of each script or
-   shared project settings).
-2. Run modules in order **A → B/C → D**. Within A, steps **01 → 02 → 03** are
-   sequential. After peak calling, QTL mapping (05–06), DEGs (09), peak–gene
-   linking (10), and SCENIC+ (12) can largely proceed in parallel where inputs
-   allow.
-3. Several QTL scripts use an example cell type (e.g. pooled neurons); loop over
-   cell types for a full atlas-level analysis.
-4. Steps 05/06 combine R preprocessing with separate FastQTL shell runs; step 08
-   (S-LDSC) is long-running and is usually executed in stages.
-
-```bash
-Rscript Filtering-Clustering.R
-Rscript PD-differential-nebula-deg.R
-bash GWAS-LDSC-QTL.sh
-python scenicplus_step1_per_celltype.py --proj-dir ./scenicplus_project --celltypes Microglia
-```
-
 ---
 
 ## Scope
@@ -136,6 +115,4 @@ Scripts retain **core analysis steps** for reproducibility. Omitted from most
 modules (see original project scripts if needed): package installation,
 interactive debugging, many QC/summary figures, and downstream interpretation
 panels (e.g. LocusZoom, motif-break analyses, broad GO collections beyond
-eRegulon GSEA). Clustering still keeps QC/UMAP plots required for annotation.
-
-S-LDSC **plotting** is not included here.
+eRegulon GSEA). 
