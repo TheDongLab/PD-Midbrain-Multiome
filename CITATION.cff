@@ -1,0 +1,51 @@
+cff-version: 1.2.0
+message: >-
+  If you use this software, please cite the archived Zenodo release using the
+  metadata below and cite the associated manuscript when available.
+title: "Analysis code for single-nucleus multiomic profiling of Parkinson's disease midbrain"
+type: software
+authors:
+  - family-names: Lu
+    given-names: Mingming
+    affiliation: Yale University
+    orcid: "https://orcid.org/0009-0000-7357-0272"
+date-released: 2026-08-13
+doi: "10.5281/zenodo.21924320"
+url: "https://doi.org/10.5281/zenodo.21924320"
+repository-code: "https://github.com/TheDongLab/PD-Midbrain-Multiome"
+license: MIT
+abstract: >-
+  Analysis code for single-nucleus RNA and chromatin-accessibility profiling
+  of postmortem human midbrain samples spanning healthy controls, incidental
+  Lewy body disease, and Parkinson's disease. The repository contains R,
+  Python, and shell scripts for multiome processing, QTL and GWAS integration,
+  differential expression, peak-gene linking, and regulatory-network analyses.
+keywords:
+  - Parkinson's disease
+  - single-nucleus multiome
+  - snRNA-seq
+  - snATAC-seq
+  - chromatin accessibility
+  - gene regulation
+  - QTL
+references:
+  - type: dataset
+    title: "Processed results from single-nucleus multiomic profiling of Parkinson's disease midbrain"
+    authors:
+      - family-names: Lu
+        given-names: Mingming
+        affiliation: Yale University
+        orcid: "https://orcid.org/0009-0000-7357-0272"
+    date-released: 2026-08-14
+    doi: "10.5281/zenodo.21937673"
+    url: "https://doi.org/10.5281/zenodo.21937673"
+  - type: generic
+    title: "Key resource table"
+    authors:
+      - family-names: Lu
+        given-names: Mingming
+        affiliation: Yale University
+        orcid: "https://orcid.org/0009-0000-7357-0272"
+    date-released: 2026-08-14
+    doi: "10.5281/zenodo.21938197"
+    url: "https://doi.org/10.5281/zenodo.21938197"

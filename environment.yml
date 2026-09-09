@@ -1,0 +1,62 @@
+name: pd-midbrain-multiome
+
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+
+dependencies:
+  # Core runtimes
+  - python=3.11.3
+  - r-base=4.4.1
+  - pip=24.2
+  - r-biocmanager=1.30.25
+  - r-remotes=2.5.0
+
+  # Python analysis stack
+  - numpy=1.26.4
+  - pandas=1.5.0
+  - scipy=1.12.0
+  - pyyaml=6.0.1
+  - scanpy=1.8.2
+  - pybiomart=0.2.0
+  - pyranges=0.0.111
+
+  # R/CRAN packages
+  - r-seurat=5.2.1
+  - r-signac=1.14.0
+  - r-harmony=1.2.3
+  - r-hdf5r=1.3.12
+  - r-cluster=2.1.8.1
+  - r-openxlsx=4.2.8
+  - r-ggplot2=3.5.1
+  - r-dplyr=1.1.4
+  - r-tidyverse=2.0.0
+  - r-data.table=1.17.0
+  - r-matrixstats=1.5.0
+  - r-rcolorbrewer=1.1.3
+
+  # R/Bioconductor packages
+  - bioconductor-genomicfeatures=1.54.4
+  - bioconductor-ensdb.hsapiens.v86=2.99.0
+  - bioconductor-genomicranges=1.54.1
+  - bioconductor-rtracklayer=1.62.0
+  - bioconductor-scdblfinder=1.16.0
+  - bioconductor-biocparallel=1.36.0
+  - bioconductor-mbkmeans=1.18.0
+  - bioconductor-edger=4.0.16
+  - bioconductor-ruvseq=1.36.0
+  - bioconductor-clusterprofiler=4.10.1
+
+  # Command-line and Python workflow dependencies
+  - macs3=3.0.3
+  - snakemake-minimal
+  - pip:
+      - pycisTopic==1.0.1.dev67
+      - pycistarget==1.1
+      - scenicplus==1.0a2
+
+# The following tested components are documented but not installed by this
+# Conda specification because they require separate upstream, source, or
+# licensed installation: Cell Ranger ARC 2.0.2, FastQTL 2.184_gtex, LDSC 1.0.1,
+# PEER 1.0, moloc 0.1.0, nebula 1.5.3, and scMultiMap 1.0.1.
