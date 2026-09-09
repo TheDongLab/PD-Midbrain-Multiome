@@ -1,0 +1,96 @@
+# ASAP Multiome — main pipeline conda environment
+#
+# Verified against the project's single_cell_env (steps 01–11, 13):
+#   R 4.3.3, Python 3.12.3
+#
+# Other environments:
+#   environment-scenicplus.yml  — SCENIC+ (step 12): Python 3.11.3
+#   environment-peer.yml        — PEER (steps 05/06): R 3.4.1
+#
+# Create and activate:
+#   conda env create -f environment.yml
+#   conda activate asap-multiome
+#
+# GitHub-only R packages (not on conda) — run once after env create:
+#   R -e 'install.packages(c("remotes","BiocManager"), repos="https://cloud.r-project.org")'
+#   R -e 'remotes::install_version("nebula","1.5.3"); remotes::install_github("clagiamba/moloc@f083d8e44577c9a0c3a562f0d99957851f50fa68"); remotes::install_github("ChangSuBiostats/scMultiMap@818d2ba973c9f728d9a69e7adc7d002f24b81282")'
+#
+# Install separately: Cell Ranger ARC, FastQTL, LDSC (LDSC_HOME in config.R).
+
+name: asap-multiome
+channels:
+  - macs3
+  - conda-forge
+  - bioconda
+  - defaults
+
+dependencies:
+  # ---- Python ----
+  - python=3.12.3
+  - numpy
+  - pandas
+  - scipy
+  - cython
+  - pyyaml
+
+  # ---- R core ----
+  - r-base=4.3.3
+  - r-seurat>=5.1
+  - r-seuratobject>=5.0
+  - r-signac>=1.14
+  - r-remotes
+  - r-biocmanager
+  - r-curl
+  - r-tidyverse
+
+  # ---- Bioconductor ----
+  - bioconductor-edger
+  - bioconductor-genomicranges
+  - bioconductor-genomeinfodb
+  - bioconductor-iranges
+  - bioconductor-s4vectors
+  - bioconductor-biocparallel
+  - bioconductor-scran
+  - bioconductor-scater
+  - bioconductor-scdblfinder
+  - bioconductor-ruvseq
+  - bioconductor-clusterprofiler
+  - bioconductor-genomicfeatures
+  - bioconductor-rtracklayer
+  - bioconductor-ensdb.hsapiens.v86
+  - bioconductor-bsgenome.hsapiens.ucsc.hg38
+  - bioconductor-mbkmeans
+  - bioconductor-singlecellexperiment
+  - bioconductor-summarizedexperiment
+  - bioconductor-delayedarray
+  - bioconductor-xvector
+  - bioconductor-zlibbioc
+
+  # ---- CRAN (conda) ----
+  - r-data.table
+  - r-dplyr
+  - r-ggplot2
+  - r-tidyr
+  - r-readr
+  - r-stringr
+  - r-purrr
+  - r-tibble
+  - r-matrixstats
+  - r-rcolorbrewer
+  - r-cluster
+  - r-openxlsx
+  - r-hdf5r
+  - r-harmony
+
+  # ---- Command-line tools ----
+  - macs3::macs3
+  - samtools
+  - bedtools
+  - bcftools
+  - tabix
+  - ucsc-liftover
+  - ucsc-bedgraphtobigwig
+  - deeptools
+  - plink
+  - git
+  - make

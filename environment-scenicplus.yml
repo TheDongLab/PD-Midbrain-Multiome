@@ -1,0 +1,38 @@
+# ASAP Multiome — SCENIC+ conda environment (step 12 only)
+#
+# Verified against the project's scenicplus env (actually used for SCENIC+):
+#   R 4.4.1, Python 3.11.3 (+ pip packages below)
+#
+# Main pipeline used single_cell_env / asap-multiome instead (R 4.3.3, Python 3.12.3).
+#
+# Create and activate:
+#   conda env create -f environment-scenicplus.yml
+#   conda activate asap-scenicplus
+#
+# Then run scripts/scenicplus_step1/2/3_per_celltype.py from this environment.
+
+name: asap-scenicplus
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+
+dependencies:
+  - python=3.11.3
+  - r-base=4.4.1
+  - bedtools=2.31.1
+  - sqlite=3.40.0
+  - snakemake
+  - pip
+  - pip:
+      - scanpy==1.8.2
+      - anndata==0.10.5.post1
+      - numpy==1.26.4
+      - pandas==1.5.0
+      - scipy==1.12.0
+      - PyYAML==6.0.1
+      - pybiomart==0.2.0
+      - pyranges==0.0.111
+      - pycistarget==1.1
+      - git+https://github.com/aertslab/pycisTopic.git@fc9b4d0
+      - scenicplus==1.0a2

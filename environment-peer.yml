@@ -1,0 +1,31 @@
+# ASAP Multiome — PEER conda environment (steps 05/06 only)
+#
+# Verified against the project's peer env (actually used for PEER hidden factors):
+#   R 3.4.1, Python 3.5.5
+#
+# Main pipeline used single_cell_env / asap-multiome instead (R 4.3.3).
+# SCENIC+ used scenicplus / asap-scenicplus (R 4.4.1, Python 3.11.3).
+#
+# Create and activate:
+#   conda env create -f environment-peer.yml
+#   conda activate asap-peer
+#
+# Run only the PEER blocks in scripts/caQTL-preprocess.R and
+# scripts/eQTL-preprocess.R
+# inside this environment.
+
+name: asap-peer
+channels:
+  - conda-forge
+  - bioconda
+  - r
+  - defaults
+
+dependencies:
+  - python=3.5.5
+  - r-base=3.4.1
+  - r-peer=1.3
+  - r-qtl=1.41_6
+  - r-matrixstats
+  - libgfortran=3
+  - zlib=1.2.13
